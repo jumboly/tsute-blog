@@ -36,5 +36,23 @@ jobs:
             --cache-control "public,max-age=300" --exclude "_astro/*"
           aws s3 sync dist/_astro/ "s3://${{ vars.BLOG_BUCKET }}/_astro/" \
             --cache-control "public,max-age=31536000,immutable"
+      # "/*" だとアプリと共有するディストリビューション上の /api/* 等のキャッシュまで消えるため、
+      # ビルド成果物のトップレベルから Blog が配信するパスだけを組み立てる（記事や public/ の追加に自動追従させる）。
+      # _astro/ はファイル名にハッシュを含み内容が変われば URL も変わるので対象外。
       - name: Invalidate
-        run: aws cloudfront create-invalidation --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" --paths "/*" "/"
+        run: |
+          paths=("/")
+          for entry in dist/*; do
+            name="$(basename "$entry")"
+            [ "$name" = "_astro" ] && continue
+            if [ -d "$entry" ]; then
+              # "/posts/*" は "/posts" 自体にマッチしないため両方指定する
+              paths+=("/$name" "/$name/*")
+            else
+              paths+=("/$name")
+            fi
+          done
+          printf 'Invalidating: %s\n' "${paths[@]}"
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "${paths[@]}"

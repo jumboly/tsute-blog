@@ -1,11 +1,12 @@
 ---
 import Base from "./Base.astro";
+import { formatDateTime, toISO } from "../lib/date";
 const { frontmatter } = Astro.props;
 ---
-<Base title={frontmatter.title} description={frontmatter.description}>
+<Base title={`${frontmatter.title} | つて ブログ`} description={frontmatter.description}>
   <article>
     <h1>{frontmatter.title}</h1>
-    <p class="muted">{frontmatter.date}</p>
+    <p class="muted"><time datetime={toISO(frontmatter.date)}>{formatDateTime(frontmatter.date)}</time></p>
     <slot />
   </article>
 </Base>

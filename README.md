@@ -4,7 +4,9 @@ Astro による静的サイト。アプリ「つて」と同じ FQDN のルー�
 
 - 記事: `src/pages/posts/*.md` に Markdown を追加するだけ（frontmatter: `layout`, `title`, `date`, `description`, `draft`）
 - ローカル: `npm install && npm run dev`
-- デプロイ: main への push で GitHub Actions が S3 に同期し CloudFront を invalidation（`/api/*`, `/ws` には影響しない）
+- デプロイ: main への push で GitHub Actions が S3 に同期し CloudFront を invalidation
+  - invalidation は `dist/` のトップレベル（`_astro/` を除く）から組み立てた Blog のパスだけを対象にするため、`/api/*`, `/ws` には影響しない
+  - `public/` や `src/pages/` にトップレベルの項目を足すと、対象パスも自動で増える（ワイルドカードは 1 パスとして数えるので、パス数は少ないまま）
 
 ## インフラの所有責務
 
