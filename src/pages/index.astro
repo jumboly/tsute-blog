@@ -1,0 +1,16 @@
+---
+import Base from "../layouts/Base.astro";
+// Markdown を置くだけで記事一覧に載るようにする（コンテンツ追加の手間を最小にするため）
+const posts = Object.values(import.meta.glob("./posts/*.md", { eager: true }))
+  .filter((p) => !p.frontmatter.draft)
+  .sort((a, b) => String(b.frontmatter.date).localeCompare(String(a.frontmatter.date)));
+---
+<Base title="Technical Blog" description="AI エージェントを使った開発と技術調査の記録">
+  <h1>Technical Blog</h1>
+  <p class="muted">AI エージェントを使った開発や技術調査から得られた知見を公開しています。</p>
+  <ul>
+    {posts.map((p) => (
+      <li><a href={p.url}>{p.frontmatter.title}</a> <span class="muted">{p.frontmatter.date}</span></li>
+    ))}
+  </ul>
+</Base>
