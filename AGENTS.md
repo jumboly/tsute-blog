@@ -4,9 +4,11 @@
 
 ## 置き場所とファイル名
 
-- `src/content/posts/<slug>.md` に置く。`<slug>` がそのまま URL（`/posts/<slug>/`）になる
+- `src/content/posts/YYYY-MM-DD-<slug>.md` に置く（例: `2026-09-27-claude-code-hooks-intro.md`）。
+  URL は `/posts/<slug>/` になる
+- 先頭の日付は `pubDatetime` の日付に合わせる。エディタで日付順に並べるためだけのもので、URL には入らない
 - `<slug>` は内容を表す英小文字の kebab-case（例: `claude-code-hooks-intro`）。
-  後から変えると URL が変わってリンク切れになるため、公開後はリネームしない
+  後から変えると URL が変わってリンク切れになるため、公開後は `<slug>` 部分を変えない
 - `_` で始まるファイル・ディレクトリは記事として扱われない（下書きの退避に使える）
 
 ## frontmatter
