@@ -30,7 +30,9 @@ export default defineAstroPaperConfig({
     editPost: { enabled: false },
     search: "pagefind",
   },
-  socials: [],
+  socials: [
+    { name: "github", url: "https://github.com/jumboly", linkTitle: "GitHub" },
+  ],
   shareLinks: [
     { name: "x", url: "https://x.com/intent/post?url=", linkTitle: "X でシェア" },
     { name: "facebook", url: "https://www.facebook.com/sharer.php?u=", linkTitle: "Facebook でシェア" },
