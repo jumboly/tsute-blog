@@ -310,7 +310,7 @@ AIにも、ドキュメントや既存コードを渡して理解させる必要
 
 面白いのは、Team Topologiesでは、
 
-> "Should this platform exist?"
+> "Should this (platform) exist?"
 >
 > 「そもそも、このPlatformは存在すべきなのか？」
 
