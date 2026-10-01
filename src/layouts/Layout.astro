@@ -1,6 +1,7 @@
 ---
 import { Font } from "astro:assets";
 import { ClientRouter } from "astro:transitions";
+import { PUBLIC_CF_BEACON_TOKEN } from "astro:env/client";
 import { getRelativeLocaleUrl } from "astro:i18n";
 import { resolveDefaultOgImagePath } from "@/utils/resolveDefaultOgImagePath";
 import { getAssetPath } from "@/utils/withBase";
@@ -112,6 +113,24 @@ const rssHref = getRelativeLocaleUrl(
         window.__theme = { value: theme };
       })();
     </script>
+
+    <!--
+      Cloudflare Web Analytics。ClientRouter でページ遷移が pushState になり
+      通常のロードイベントが起きないため、spa: true で遷移も 1 PV として数えさせる
+    -->
+    {
+      PUBLIC_CF_BEACON_TOKEN && (
+        <script
+          is:inline
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={JSON.stringify({
+            token: PUBLIC_CF_BEACON_TOKEN,
+            spa: true,
+          })}
+        />
+      )
+    }
 
     <ClientRouter />
   </head>

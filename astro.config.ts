@@ -77,6 +77,12 @@ export default defineConfig({
         context: "client",
         optional: true,
       }),
+      // 未設定ならビーコンを出さない。ローカルの dev/preview で計測を汚さないため
+      PUBLIC_CF_BEACON_TOKEN: envField.string({
+        access: "public",
+        context: "client",
+        optional: true,
+      }),
     },
   },
   experimental: {

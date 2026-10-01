@@ -25,6 +25,8 @@ jobs:
       - run: npm run build
         env:
           SITE_URL: ${{ vars.APP_BASE_URL }}
+          # ビーコンのトークンは HTML に埋め込まれて公開される値なので secrets ではなく vars に置く
+          PUBLIC_CF_BEACON_TOKEN: ${{ vars.CF_BEACON_TOKEN }}
       # このロールは Blog バケットへの書き込みと invalidation しか持たない（アプリ側の edge スタックで定義）
       - uses: aws-actions/configure-aws-credentials@v6
         with:
