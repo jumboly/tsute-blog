@@ -31,3 +31,6 @@ public/pagefind
 
 # docker compose
 compose.override.yaml
+
+# blog post ideas (kept local; see AGENTS.md)
+/ideas/
