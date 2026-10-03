@@ -69,6 +69,15 @@ export default defineConfig({
       styles: ["normal", "italic"],
       formats: ["woff", "ttf"],
     },
+    {
+      // 記事ごとの OG 画像（satori）でだけ使う。satori は woff2 を読めないため ttf を取得する
+      name: "Noto Sans JP",
+      cssVariable: "--font-noto-sans-jp",
+      provider: fontProviders.google(),
+      weights: [400, 700],
+      styles: ["normal"],
+      formats: ["ttf"],
+    },
   ],
   env: {
     schema: {

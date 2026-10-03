@@ -22,9 +22,9 @@ export default defineAstroPaperConfig({
   },
   features: {
     lightAndDarkMode: true,
-    // 同梱の OG 生成用フォント（Google Sans Code）は日本語グリフを持たず文字化けするため、
-    // 静的な public/default-og.jpg を全ページ共通で使う
-    dynamicOgImage: false,
+    // X のカードはタイトルを画像の上に小さく重ねるだけなので、記事ごとにタイトル入りの画像を作る。
+    // 記事以外のページは public/default-og.jpg のまま
+    dynamicOgImage: true,
     showArchives: true,
     showBackButton: true,
     editPost: { enabled: false },
