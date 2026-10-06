@@ -7,16 +7,20 @@ on:
 
 permissions:
   contents: read
-  id-token: write # GitHub OIDC → AWS（長期アクセスキーを使わない）
 
 concurrency:
   group: blog-deploy
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  # GitHub Pages への移行中は、DNS を切り替えるまで配信を止めないよう S3 にも同じ成果物を置く。
+  # 切り替え後は S3 / CloudFront の手順と AWS 関連の権限・変数を削除する
+  build:
     runs-on: ubuntu-latest
     environment: production
+    permissions:
+      contents: read
+      id-token: write # GitHub OIDC → AWS（長期アクセスキーを使わない）
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -27,6 +31,9 @@ jobs:
           SITE_URL: ${{ vars.APP_BASE_URL }}
           # ビーコンのトークンは HTML に埋め込まれて公開される値なので secrets ではなく vars に置く
           PUBLIC_CF_BEACON_TOKEN: ${{ vars.CF_BEACON_TOKEN }}
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist/
       # このロールは Blog バケットへの書き込みと invalidation しか持たない（アプリ側の edge スタックで定義）
       - uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -58,3 +65,16 @@ jobs:
           aws cloudfront create-invalidation \
             --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" \
             --paths "${paths[@]}"
+
+  pages:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write # デプロイがこのリポジトリの Actions から来たことを Pages が検証するため
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
