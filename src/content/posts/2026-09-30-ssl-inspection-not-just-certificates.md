@@ -2,6 +2,7 @@
 title: SSLインスペクションは「証明書を入れれば終わり」ではない
 pubDatetime: 2026-09-30T23:43:00+09:00
 description: SSLインスペクションのある開発環境で、ツールごとのCA設定、端末ごとに積み上がる例外、原因切り分けに消える開発者の時間など、「証明書を配れば終わり」では済まない運用コストについて考えた。
+modDatetime: 2026-10-07T06:34:00+09:00
 tags:
   - セキュリティ
 ---
@@ -28,7 +29,35 @@ Windowsの証明書ストアにCA証明書を配布する。EdgeやChromeでWeb�
 
 でも開発者はブラウザだけ使って仕事をしているわけではない。Java、Node.js、Python、Git、curl、Docker、パッケージマネージャー、クラウドSDK、各種CLI、IDE、ビルドツール。いろんなものがHTTPS通信をするし、それらが全部OSの証明書ストアを同じように参照するわけでもない。[[3]](https://nodejs.org/api/cli.html)[[4]](https://requests.readthedocs.io/en/latest/user/advanced/)[[5]](https://git-scm.com/docs/git-config)[[6]](https://docs.oracle.com/en/java/javase/21/docs/specs/man/keytool.html)
 
+社内CAを信頼させるだけでも、ツールごとにこうなる。
+
+```bash
+export NODE_EXTRA_CA_CERTS=/path/to/corp-ca.pem   # Node.js
+npm config set cafile /path/to/corp-ca.pem        # npm
+export REQUESTS_CA_BUNDLE=/path/to/corp-ca.pem    # Python Requests
+pip config set global.cert /path/to/corp-ca.pem   # pip
+export SSL_CERT_FILE=/path/to/corp-ca.pem         # OpenSSLを使うもの
+export CURL_CA_BUNDLE=/path/to/corp-ca.pem        # curl
+git config --global http.sslCAInfo /path/to/corp-ca.pem
+export CARGO_HTTP_CAINFO=/path/to/corp-ca.pem     # Cargo
+export AWS_CA_BUNDLE=/path/to/corp-ca.pem         # AWS CLI
+gcloud config set core/custom_ca_certs_file /path/to/corp-ca.pem
+keytool -importcert -cacerts -alias corp-ca -file corp-ca.pem   # Java
+```
+
+どれも各ツールの公式ドキュメントに載っている方法である。[[7]](https://docs.npmjs.com/cli/v10/using-npm/config)[[8]](https://pip.pypa.io/en/stable/topics/https-certificates/)[[9]](https://docs.openssl.org/master/man7/openssl-env/)[[10]](https://curl.se/docs/sslcerts.html)[[11]](https://doc.rust-lang.org/cargo/reference/config.html)[[12]](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html)[[13]](https://cloud.google.com/sdk/docs/proxy-settings) しかも`NODE_EXTRA_CA_CERTS`のように既定のCAに追加するものもあれば、`REQUESTS_CA_BUNDLE`や`SSL_CERT_FILE`のように既定のCAを置き換えるものもある。置き換える方に社内CAだけのファイルを渡すと、今度はSSLインスペクションの対象外のサイトにつながらなくなる。
+
 その結果、新しいツールを使うたびに「このツールはどこのCAを見るんだ」「環境変数なのか」「設定ファイルなのか」「独自のTrustStoreなのか」「PEMにしないといけないのか」と調べることになる。なんでAPIを一つ使いたいだけなのに、毎回こんなことを調べないといけないのか。こっちはPKIの検証をしたいわけではない。仕事をしたいだけである。
+
+ホスト側でこれを全部済ませても、まだ終わらない。Dockerのコンテナの中は別の世界なので、結局またイメージの中にCAを入れなあかん。Debian系のイメージならこうである。[[14]](https://manpages.debian.org/unstable/ca-certificates/update-ca-certificates.8.en.html)
+
+```dockerfile
+# 社内のSSLインスペクション用CA
+COPY corp-ca.crt /usr/local/share/ca-certificates/
+RUN update-ca-certificates
+```
+
+`docker build`の途中で走る`apt-get`や`npm install`も検査された通信を通るので、動かすときだけでなく、イメージを作る途中でも必要になる。どこへ持っていっても同じように動くのがコンテナの良さのはずなのに、そのDockerfileに自社のCAという環境依存が焼き込まれる。
 
 ## PCごとに謎の歴史が積み上がる
 
@@ -162,3 +191,35 @@ SSLインスペクションは「証明書を入れれば終わり」ではな�
 6. Oracle, [“The keytool Command”](https://docs.oracle.com/en/java/javase/21/docs/specs/man/keytool.html) - cacerts Certificates File  
    **「keytoolコマンド」**  
    Java SE 21公式ドキュメント。JavaのCA証明書はJDKの中の`cacerts`という独自のキーストアに入っていて、`keytool`で管理する。
+
+7. npm, [“config”](https://docs.npmjs.com/cli/v10/using-npm/config) - cafile  
+   **「config」**  
+   npm公式ドキュメント。`cafile`に、信頼するCA証明書を入れたファイルのパスを指定する。
+
+8. pip, [“HTTPS Certificates”](https://pip.pypa.io/en/stable/topics/https-certificates/)  
+   **「HTTPS証明書」**  
+   pip公式ドキュメント。`--cert`（環境変数`PIP_CERT`）で、既定のCAの代わりに使う証明書バンドルを指定できる。設定ファイルのキー名は長いオプション名から作られるので、`global.cert`になる。
+
+9. OpenSSL, [“openssl-env”](https://docs.openssl.org/master/man7/openssl-env/)  
+   **「openssl-env」**  
+   OpenSSL公式ドキュメント。`SSL_CERT_FILE`と`SSL_CERT_DIR`で、既定のCA証明書のファイルやディレクトリを指定する。
+
+10. curl, [“SSL Certificates”](https://curl.se/docs/sslcerts.html)  
+    **「SSL証明書」**  
+    curl公式ドキュメント。ネイティブのCAストアを使わない場合、環境変数`CURL_CA_BUNDLE`で独自のCAファイルを指定できる。
+
+11. The Cargo Book, [“Configuration”](https://doc.rust-lang.org/cargo/reference/config.html) - http.cainfo  
+    **「設定」**  
+    Cargo公式ドキュメント。`http.cainfo`（環境変数`CARGO_HTTP_CAINFO`）でCAバンドルのパスを指定する。指定しなければシステムの証明書を使おうとする。
+
+12. AWS, [“Configuring environment variables for the AWS CLI”](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html) - AWS_CA_BUNDLE  
+    **「AWS CLIの環境変数の設定」**  
+    AWS CLIユーザーガイド。`AWS_CA_BUNDLE`で、HTTPSの証明書検証に使う証明書バンドルを指定する。
+
+13. Google Cloud, [“Configuring the gcloud CLI for use behind a proxy/firewall”](https://cloud.google.com/sdk/docs/proxy-settings)  
+    **「プロキシやファイアウォールの内側でgcloud CLIを使うための設定」**  
+    Google Cloud公式ドキュメント。中間者型のプロキシでSSLハンドシェイクのエラーが出る場合の対処として、`core/custom_ca_certs_file`の設定が載っている。
+
+14. Debian, [“update-ca-certificates(8)”](https://manpages.debian.org/unstable/ca-certificates/update-ca-certificates.8.en.html)  
+    **「update-ca-certificates(8)」**  
+    Debianのマニュアルページ。`/usr/local/share/ca-certificates`以下にある拡張子`.crt`のPEM形式の証明書を、信頼するCAとして取り込む。
