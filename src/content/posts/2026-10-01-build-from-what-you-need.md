@@ -86,7 +86,7 @@ DLL版
 
 今回はこちらの方を結構大きく見た。
 
-この考え方は、別に「古いものは全部捨てろ」という話ではない。Martin Fowlerのサイトで公開されている「Patterns of Legacy Displacement」の Transitional Architecture でも、移行のために必要だったものが役目を終えたあとも残り続けると、将来のチームがシステムを保守・発展させるのを難しくすると指摘されている。今回の規模はもっと小さいけれど、「使っていないものが残っていても害はない」とは限らない、という点は同じだと思う。
+この考え方は、別に「古いものは全部捨てろ」という話ではない。Martin Fowlerのサイトで公開されている「Patterns of Legacy Displacement」のTransitional Architectureでも、移行のために必要だったものが役目を終えたあとも残り続けると、将来のチームがシステムを保守・発展させるのを難しくすると指摘されている。今回の規模はもっと小さいけれど、「使っていないものが残っていても害はない」とは限らない、という点は同じだと思う。
 
 ## 今回は既存版を答えにできる
 
@@ -104,9 +104,9 @@ DLL版
 AとBは同じか
 ```
 
-これは後から調べてみると、Michael Feathersが『Working Effectively with Legacy Code』で紹介している Characterization Test の考え方にかなり近い。望ましい挙動を一から定義するのではなく、まず現在の実装が実際にどう振る舞っているかを捉えて、それを変更時の安全網にするという考え方である。
+これは後から調べてみると、Michael Feathersが『Working Effectively with Legacy Code』で紹介しているCharacterization Testの考え方にかなり近い。望ましい挙動を一から定義するのではなく、まず現在の実装が実際にどう振る舞っているかを捉えて、それを変更時の安全網にするという考え方である。
 
-また「Patterns of Legacy Displacement」の Feature Parity でも、既存実装の周囲にテストを作り、そのテストを新しい実装にも適用することで置き換えのリスクを抑えた事例が紹介されている。今回やろうとしていることを、別に私が思いついた新しい手法だと言いたいわけではない。むしろ昔からある「既存の挙動を観測可能な正解として使う」というやり方の、小さな適用例と考えた方が近い。
+また「Patterns of Legacy Displacement」のFeature Parityでも、既存実装の周囲にテストを作り、そのテストを新しい実装にも適用することで置き換えのリスクを抑えた事例が紹介されている。今回やろうとしていることを、別に私が思いついた新しい手法だと言いたいわけではない。むしろ昔からある「既存の挙動を観測可能な正解として使う」というやり方の、小さな適用例と考えた方が近い。
 
 今回なら、必要なものを持ってくる。足りなければビルドで気づく。動いたら既存版と結果を比較する。この二段構えがあるので、新しいフォルダから組み立て直すこと自体のリスクは、それほど高くないと判断した。
 
@@ -146,13 +146,13 @@ AとBは同じか
 
 ![「消すより、必要なものだけ持ってくる」の内容を1枚にまとめた図。ActiveX版とDLL版の成り立ち、古いものが残ったフォルダ、削る方法と新しく作る方法の比較、統合後の構成、足りないものはビルドで分かること、既存版との結果比較、参考になる既存の考え方](@/assets/images/build-from-what-you-need-overview.png)
 
-## 参考文献
+## 参考資料
 
 ※『』の書名は公式の邦題、「」の日本語訳は内容をつかみやすくするための便宜的な訳で、公式な邦題ではありません。
 
 1. Michael C. Feathers, _Working Effectively with Legacy Code_  
    **[『レガシーコード改善ガイド』](https://www.shoeisha.co.jp/book/detail/9784798116839)**（翔泳社, 2009）  
-   Prentice Hall, 2004. レガシーコードを安全に変更するための考え方をまとめた本。今回の話では、現在の挙動を捉えて変更時の安全網にする Characterization Test の考え方が特に近い。
+   Prentice Hall, 2004. レガシーコードを安全に変更するための考え方をまとめた本。今回の話では、現在の挙動を捉えて変更時の安全網にするCharacterization Testの考え方が特に近い。
 
 2. Ian Cartwright, Rob Horn, James Lewis, [“Feature Parity”](https://martinfowler.com/articles/patterns-legacy-displacement/feature-parity.html) - Patterns of Legacy Displacement  
    **「機能の同等性――レガシーを置き換えるためのパターン」**  
@@ -164,4 +164,4 @@ AとBは同じか
 
 4. Danilo Sato, [“Parallel Change”](https://martinfowler.com/bliki/ParallelChange.html)  
    **「並行変更」**  
-   martinfowler.com, 2014-05-13. Expand - Migrate - Contract の段階に分け、旧方式と新方式を一時的に共存させながら安全に移行する考え方。今回の方法そのものではないが、「既存をその場で一気に完成形へ直す」以外の安全な変更方法として参考になる。
+   martinfowler.com, 2014-05-13. Expand - Migrate - Contractの段階に分け、旧方式と新方式を一時的に共存させながら安全に移行する考え方。今回の方法そのものではないが、「既存をその場で一気に完成形へ直す」以外の安全な変更方法として参考になる。

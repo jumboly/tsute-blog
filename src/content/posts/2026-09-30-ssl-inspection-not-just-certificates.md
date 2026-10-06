@@ -22,11 +22,11 @@ SSLインスペクション
 example.com
 ```
 
-PCから見えている `example.com` の証明書は、本来のサーバーが提示したものではない。途中の装置が生成し、企業内で信頼させているCAによって署名した証明書になる。そのためPC側では、そのCAを信頼する必要がある。
+PCから見えている`example.com`の証明書は、本来のサーバーが提示したものではない。途中の装置が生成し、企業内で信頼させているCAによって署名した証明書になる。そのためPC側では、そのCAを信頼する必要がある。[[1]](https://www.cisa.gov/news-events/alerts/2017/03/16/https-interception-weakens-tls-security)
 
 Windowsの証明書ストアにCA証明書を配布する。EdgeやChromeでWebを見るくらいなら、これでかなりのものは動く。ここだけ見れば、それほど大した話には見えない。
 
-でも開発者はブラウザだけ使って仕事をしているわけではない。Java、Node.js、Python、Git、curl、Docker、パッケージマネージャー、クラウドSDK、各種CLI、IDE、ビルドツール。いろんなものがHTTPS通信をするし、それらが全部OSの証明書ストアを同じように参照するわけでもない。
+でも開発者はブラウザだけ使って仕事をしているわけではない。Java、Node.js、Python、Git、curl、Docker、パッケージマネージャー、クラウドSDK、各種CLI、IDE、ビルドツール。いろんなものがHTTPS通信をするし、それらが全部OSの証明書ストアを同じように参照するわけでもない。[[3]](https://nodejs.org/api/cli.html)[[4]](https://requests.readthedocs.io/en/latest/user/advanced/)[[5]](https://git-scm.com/docs/git-config)[[6]](https://docs.oracle.com/en/java/javase/21/docs/specs/man/keytool.html)
 
 その結果、新しいツールを使うたびに「このツールはどこのCAを見るんだ」「環境変数なのか」「設定ファイルなのか」「独自のTrustStoreなのか」「PEMにしないといけないのか」と調べることになる。なんでAPIを一つ使いたいだけなのに、毎回こんなことを調べないといけないのか。こっちはPKIの検証をしたいわけではない。仕事をしたいだけである。
 
@@ -50,7 +50,7 @@ Windowsの証明書ストアにCA証明書を配布する。EdgeやChromeでWeb�
 
 新しいSDKを使ってエラーが出たとする。普通なら自分のコード、SDKの使い方、認証情報、権限、サービス側の障害などを調べる。SSLインスペクションのある環境では、そこに「途中で通信をいじられていないか」という原因候補が一つ追加される。
 
-しかもSSLインスペクションが原因だからといって、必ず `certificate verify failed` と分かりやすく出てくれるわけではない。SDK内部で例外が別のエラーに変換されたり、リトライした末にタイムアウトになったり、認証失敗のように見えたりする。だから普通にコードを読む。ログを見る。設定を見る。ドキュメントを読む。GitHub Issuesを探す。散々調べたあとで、「これSSLインスペクションちゃうんか」となって、調べてみたら当たりだったりする。
+しかもSSLインスペクションが原因だからといって、必ず`certificate verify failed`と分かりやすく出てくれるわけではない。SDK内部で例外が別のエラーに変換されたり、リトライした末にタイムアウトになったり、認証失敗のように見えたりする。だから普通にコードを読む。ログを見る。設定を見る。ドキュメントを読む。GitHub Issuesを探す。散々調べたあとで、「これSSLインスペクションちゃうんか」となって、調べてみたら当たりだったりする。
 
 これを何回やらせるねん、と思う。
 
@@ -62,7 +62,7 @@ Windowsの証明書ストアにCA証明書を配布する。EdgeやChromeでWeb�
 
 ただ、それを対症療法として何年も続けたらどうなるか。全社的な除外、部署単位の除外、端末単位の除外、特定ドメインの除外、サブドメインの除外、昔追加したCA、いまは不要になったCA、過去に設定した環境変数。そういうものが少しずつ積み上がっていく。
 
-ソフトウェア開発で、問題が起きるたびに `if` を一個ずつ追加して何年も運用しているシステムを見たら、たぶん多くの開発者は嫌な顔をすると思う。なぜネットワーク運用なら、それを延々と続けてよいことになるのか。
+ソフトウェア開発で、問題が起きるたびに`if`を一個ずつ追加して何年も運用しているシステムを見たら、たぶん多くの開発者は嫌な顔をすると思う。なぜネットワーク運用なら、それを延々と続けてよいことになるのか。
 
 一個一個の例外にはちゃんと理由がある。だから余計に厄介である。その瞬間だけ見れば正しい。困っている人がいるから例外を追加する。それを繰り返した結果、全体がどんどん説明できなくなっていく。
 
@@ -70,9 +70,9 @@ Windowsの証明書ストアにCA証明書を配布する。EdgeやChromeでWeb�
 
 ## セキュリティ対策なのだから、むしろ雑に扱わないでほしい
 
-SSLインスペクションはTLS通信の途中に入る。クライアントが本来接続先に対して行っていた証明書検証の一部を、途中の装置が肩代わりすることになる。
+SSLインスペクションはTLS通信の途中に入る。クライアントが本来接続先に対して行っていた証明書検証の一部を、途中の装置が肩代わりすることになる。[[1]](https://www.cisa.gov/news-events/alerts/2017/03/16/https-interception-weakens-tls-security)
 
-これはかなり重要な話だと思う。途中に入って通信を復号し、利用者には自分が作った証明書を信頼させる。だったら、その装置から本来の接続先への証明書検証や、例外設定、装置自体の設定が正しいことは、普通の通信以上に慎重に扱われるべきである。
+これはかなり重要な話だと思う。途中に入って通信を復号し、利用者には自分が作った証明書を信頼させる。だったら、その装置から本来の接続先への証明書検証や、例外設定、装置自体の設定が正しいことは、普通の通信以上に慎重に扱われるべきである。[[2]](https://www.ndss-symposium.org/ndss2017/ndss-2017-programme/security-impact-https-interception/)
 
 セキュリティのための仕組みなのだから、「通信できているからOK」「証明書エラーが出ていないからOK」で済ませてはいけない。TLSの信頼モデルに自分たちで割って入っている以上、その部分の責任も自分たちで引き受ける必要がある。
 
@@ -134,3 +134,31 @@ CA証明書をどう配るのか。各ランタイムではどうするのか。
 SSLインスペクションは「証明書を入れれば終わり」ではない。動かなければ除外すれば終わりでもない。その仕組みによって生まれる複雑さとコストを誰が引き受けるのかまで考えて、初めて運用だと思う。
 
 そこを考えないのであれば、問題を解決しているのではない。ただ別の場所へ押し付けているだけである。
+
+## 参考資料
+
+※「」の日本語訳は内容をつかみやすくするための便宜的な訳で、公式な邦題ではありません。
+
+1. CISA, [“HTTPS Interception Weakens TLS Security”](https://www.cisa.gov/news-events/alerts/2017/03/16/https-interception-weakens-tls-security) - Alert TA17-075A  
+   **「HTTPSインターセプションはTLSのセキュリティを弱める」**  
+   CISA, 2017-03-16. HTTPSインスペクションは、クライアントに証明書を信頼させたうえで行う中間者であり、クライアントは装置が行う検証に頼るしかないと説明している。装置が証明書チェーンを正しく検証しているか確かめるよう求めている。
+
+2. Zakir Durumeric ほか, [“The Security Impact of HTTPS Interception”](https://www.ndss-symposium.org/ndss2017/ndss-2017-programme/security-impact-https-interception/)  
+   **「HTTPSインターセプションがセキュリティに与える影響」**  
+   NDSS Symposium 2017, 2017-02-27. 実際の通信でHTTPSインターセプションを測定し、ミドルボックスやセキュリティソフトの多くが接続の安全性を下げていたと報告した論文。
+
+3. Node.js, [“Command-line API”](https://nodejs.org/api/cli.html) - NODE_EXTRA_CA_CERTS  
+   **「コマンドラインAPI」**  
+   Node.js公式ドキュメント。Node.jsは同梱のCAストアを使い、CAを追加するにはPEMファイルを環境変数`NODE_EXTRA_CA_CERTS`で渡す。OSのストアを使うには`--use-system-ca`などの指定が要る。
+
+4. Requests, [“Advanced Usage”](https://requests.readthedocs.io/en/latest/user/advanced/) - SSL Cert Verification / CA Certificates  
+   **「高度な使い方」**  
+   Python Requests公式ドキュメント。信頼するCAはcertifiパッケージから取り、`REQUESTS_CA_BUNDLE`で差し替えられる。
+
+5. Git, [“git-config”](https://git-scm.com/docs/git-config) - http.sslCAInfo  
+   **「git-config」**  
+   Git公式ドキュメント。検証に使うCAファイルを`http.sslCAInfo`（環境変数`GIT_SSL_CAINFO`）で指定する。WindowsでSchannelを使う場合はWindowsの証明書ストアを使う。
+
+6. Oracle, [“The keytool Command”](https://docs.oracle.com/en/java/javase/21/docs/specs/man/keytool.html) - cacerts Certificates File  
+   **「keytoolコマンド」**  
+   Java SE 21公式ドキュメント。JavaのCA証明書はJDKの中の`cacerts`という独自のキーストアに入っていて、`keytool`で管理する。
