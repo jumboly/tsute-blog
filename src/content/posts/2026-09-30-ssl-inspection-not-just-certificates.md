@@ -2,7 +2,7 @@
 title: SSLインスペクションは「証明書を入れれば終わり」ではない
 pubDatetime: 2026-09-30T23:43:00+09:00
 description: SSLインスペクションのある開発環境で、ツールごとのCA設定、端末ごとに積み上がる例外、原因切り分けに消える開発者の時間など、「証明書を配れば終わり」では済まない運用コストについて考えた。
-modDatetime: 2026-10-07T06:34:00+09:00
+modDatetime: 2026-10-07T06:37:00+09:00
 tags:
   - セキュリティ
 ---
@@ -45,7 +45,7 @@ gcloud config set core/custom_ca_certs_file /path/to/corp-ca.pem
 keytool -importcert -cacerts -alias corp-ca -file corp-ca.pem   # Java
 ```
 
-どれも各ツールの公式ドキュメントに載っている方法である。[[7]](https://docs.npmjs.com/cli/v10/using-npm/config)[[8]](https://pip.pypa.io/en/stable/topics/https-certificates/)[[9]](https://docs.openssl.org/master/man7/openssl-env/)[[10]](https://curl.se/docs/sslcerts.html)[[11]](https://doc.rust-lang.org/cargo/reference/config.html)[[12]](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html)[[13]](https://cloud.google.com/sdk/docs/proxy-settings) しかも`NODE_EXTRA_CA_CERTS`のように既定のCAに追加するものもあれば、`REQUESTS_CA_BUNDLE`や`SSL_CERT_FILE`のように既定のCAを置き換えるものもある。置き換える方に社内CAだけのファイルを渡すと、今度はSSLインスペクションの対象外のサイトにつながらなくなる。
+どれも各ツールの公式ドキュメントに載っている方法である。[[7]](https://docs.npmjs.com/cli/v10/using-npm/config)[[8]](https://pip.pypa.io/en/stable/topics/https-certificates/)[[9]](https://docs.openssl.org/master/man7/openssl-env/)[[10]](https://curl.se/docs/sslcerts.html)[[11]](https://doc.rust-lang.org/cargo/reference/config.html)[[12]](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html)[[13]](https://cloud.google.com/sdk/docs/proxy-settings) しかも`NODE_EXTRA_CA_CERTS`のように既定のCAに追加するものもあれば、`REQUESTS_CA_BUNDLE`や`SSL_CERT_FILE`のように既定のCAを置き換えるものもある。置き換える方に社内CAだけのファイルを渡すと、今度はSSLインスペクションの対象外のサイトにつながらなくなる。なので自分は、curlの公式サイトで配布されている証明書の一覧（MozillaのCAストアをPEM形式にしたもの）を取ってきて、そこに社内CAを追加したファイルを作って渡していた。[[15]](https://curl.se/docs/caextract.html)
 
 その結果、新しいツールを使うたびに「このツールはどこのCAを見るんだ」「環境変数なのか」「設定ファイルなのか」「独自のTrustStoreなのか」「PEMにしないといけないのか」と調べることになる。なんでAPIを一つ使いたいだけなのに、毎回こんなことを調べないといけないのか。こっちはPKIの検証をしたいわけではない。仕事をしたいだけである。
 
@@ -223,3 +223,7 @@ SSLインスペクションは「証明書を入れれば終わり」ではな�
 14. Debian, [“update-ca-certificates(8)”](https://manpages.debian.org/unstable/ca-certificates/update-ca-certificates.8.en.html)  
     **「update-ca-certificates(8)」**  
     Debianのマニュアルページ。`/usr/local/share/ca-certificates`以下にある拡張子`.crt`のPEM形式の証明書を、信頼するCAとして取り込む。
+
+15. curl, [“CA Extract”](https://curl.se/docs/caextract.html)  
+    **「CA証明書の抽出」**  
+    curl公式サイト。MozillaのCAストアをPEM形式に変換した証明書バンドル`cacert.pem`を配布している。Mozillaのストアが変わると自動で更新される。
