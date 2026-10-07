@@ -117,7 +117,8 @@ featured: true # トップの「おすすめ」に載せたいときだけ
 - ネタは `ideas/<slug>.md` に 1 ネタ 1 ファイルで置く。`ideas/` は `.gitignore` 済み
   （公開リポジトリに未公開のネタを出さないため）
 - `<slug>` は記事ファイル名と同じ規則にする。清書したらそのまま記事の slug になる
-- 「ネタ一覧」と言われたら、`ideas/*.md` の title・status・updated を status ごとに並べる
+- 記事にしたネタは `ideas/written/<slug>.md` に移す（`ideas/` 直下をこれから書くネタだけにして見通しをよくするため）
+- 「ネタ一覧」と言われたら、`ideas/*.md` の title・status・updated を status ごとに並べる。`ideas/written/` は含めない
 
 ### ネタファイルの形
 
@@ -158,7 +159,7 @@ article: src/content/posts/2026-10-05-<slug>.md # written になったら書く
 3. この AGENTS.md に従って書く。`draft: true` を付け、`pubDatetime` は清書した時点を仮に入れておく。
    ユーザーの体験や意見を AI が足さない。足したほうがよさそうなものは本文に入れずに提案する。
    素材にあるユーザー自身の言い回しは、整えすぎずにそのまま使う
-4. ネタファイルを `status: written` にし、`article` を書く。ネタファイルは消さない
+4. ネタファイルを `status: written` にし、`article` を書いて `ideas/written/` に移す。ネタファイルは消さない
    （あとで記事を直すときに元の意図を確かめられるようにするため）
 5. 記事のパス、タグとその理由、確認できた事実・できなかった事実を報告する。コミットは頼まれてから
 6. インフォグラフィックを作るか聞く。作るなら生成用の指示文を出す（「記事内容のインフォグラフィック」の節）。
@@ -171,4 +172,4 @@ article: src/content/posts/2026-10-05-<slug>.md # written になったら書く
 1. `pubDatetime` をその時点の日本時間にする
 2. `draft: true` を外す
 3. ファイル名の先頭の日付を `pubDatetime` に合わせる（`<slug>` は変えない。URL は変わらない）
-4. ネタファイルの `article` のパスも新しいファイル名に直す
+4. `ideas/written/` にあるネタファイルの `article` のパスも新しいファイル名に直す
