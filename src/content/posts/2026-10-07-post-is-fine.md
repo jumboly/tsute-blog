@@ -54,7 +54,7 @@ RFCの説明では、GETだとURLに詰められる長さに限りがあった�
 
 結局、HTTPクライアントのライブラリにまた1個メソッドが増えるだけで、何も変わっていない。「ここはQUERYがふさわしい」という変な議論もまた増える。
 
-普及するかどうかも怪しい。間に挟まるCloudFrontとか、そういう諸々がQUERYに対応してくれないと使えない。CloudFrontのドキュメントを見ると、許可するメソッドの選択肢はGET、HEAD、OPTIONS、PUT、POST、PATCH、DELETEまでで、QUERYはなかった[[3]](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/DownloadDistValuesCacheBehavior.html#DownloadDistValuesAllowedHTTPMethods)。いつになったら使えるんだ、という話である。結局「安全策でQUERYはやめておこう」みたいになりそうである。
+普及するかどうかも怪しい。間に挟まるCloudFrontとか、そういう諸々がQUERYに対応してくれないと使えない。CloudFrontのドキュメントを見ると、許可するメソッドの選択肢はGET、HEAD、OPTIONS、PUT、POST、PATCH、DELETEまでで、QUERYはなかった[[3]](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/DownloadDistValuesCacheBehavior.html#DownloadDistValuesAllowedHTTPMethods)。いつになったら使えるんだ、という話である。結局「安全策でQUERYはやめておこう。POSTで」みたいになりそうである。POSTやん。
 
 ## 全部POSTでやってきた
 
